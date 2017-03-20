@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--[if IE 7 ]> <div id="system" class="ie7"> < ![endif]-->
+<!--[if IE 7]> <script type="text/javascript"> $('#system').addClass('ie7'); </script> < ![endif]-->
+<head>
+    <meta charset="UTF-8">
+    <title>Shuang Chang project 1 Questionnaire</title>
+    <script type="text/javascript" src="cookies.js"></script>
+    <!--check browser-->
+    <script>
+        var PRE_IE9 = false;
+    </script>
+    <!--[if le IE 9]>
+    <script>
+        var PRE_IE9 = true;
+    </script>
+    <![endif]-->
+    <SCRIPT LANGUAGE="JavaSCRIPT">
+
+        //check if IE is earlier than IE7
+        //reference: https://support.microsoft.com/en-us/kb/167820
+        function msieversion()
+        {
+            var ua = window.navigator.userAgent
+            var msie = ua.indexOf ( "MSIE " )
+
+            if ( msie > 0 )      // If Internet Explorer, return version number
+                return parseInt (ua.substring (msie+5, ua.indexOf (".", msie )))
+            else                 // If another browser, return 0
+                return 0
+
+        }
+        if ( msieversion() >= 7 )
+
+            window.alert ( "This is Internet Explorer 7 or later" );
+
+        else if ( msieversion() >= 3 )
+
+            window.alert  ( "This is Internet Explorer 3" );
+
+        else
+
+            window.alert  ( "This is a modern browser" );
+
+    </SCRIPT>
+
+
+    <script type="text/javascript">
+        //another function to check browser
+        var browserType = "UNKNOWN";
+        if( !document.getElementById && document.attachEvent){
+            browserType = 'mordern IE';
+        }else if(document.getElementById){
+            browserType = 'gekko';
+        }else if(PRE_IE9){
+            window.location.assign("newbrowser.html");
+        }
+        //can be called by check browser button on the page
+        function checkBrowser() {
+            if(browserType =='gekko') {
+                window.location.assign("newbrowser.html");
+            }
+        }
+    </script>
+
+
+    <script type="text/javascript">
+
+        //data object, each obj is in the array of the last obj
+        var obj = new Object();
+        obj['step1'] =['Did you recently visit our service center?', 'yes', 'no'],
+        obj['yes'] = ['What service did you have?','inspection','oil change','maintenance'],
+        obj['no'] = ['Would you like to make a schedule?', 'I would like to make a schedule', 'no need'],
+            obj['inspection'] = ['Did your vehicle pass the inspection?','pass','failed'],
+                obj['pass'] = ['How satisfied were you with our service?','satisfied','so so','disappointed'],
+                obj['failed'] = ['Would you like to schedule a repair with us?','repair','no thanks'],
+            obj['oil change'] = ['Did you buy additional oil?','yes, I did','no, I did not'],
+                obj['yes, I did'] = ['How satisfied were you with our service?','satisfied','so so','disappointed'],
+                obj['no, I did not'] = ['Would you like to schedule a repair with us?','repair','no thanks'],
+            obj['maintenance'] = ['Did your vehicle required additional service?','yes, it did', 'no, it did not'],
+                obj['yes, it did'] = ['How satisfied were you with our service?','satisfied','so so','disappointed'],
+                obj['no, it did not'] = ['Would you like to schedule a repair with us?','repair','no thanks'],
+            obj['I would like to make a schedule'] = ['Please pick up a section','morning','afternoon'],
+                obj['morning'] = ['Please select a time','9 - 10 am','10 - 11 am', '11 - 12 am'],
+                obj['afternoon'] = ['Please select a time','1 - 2 pm','2 - 3 pm', '3 - 4 pm']
+
+        //create greeting title, check if localstorage has saved the user name before
+        function createTitle() {
+            var usrname = '';
+            //check if using localstorage, and if usrname exists
+            if(localStorage){
+                if(localStorage.getItem('usrname')){
+                    usrname = ' '+localStorage.getItem('usrname');
+                }else{
+                    usrname = 'This is your first visit';
+                }
+            }
+            //create greeting title
+            var hello = document.createElement('h1');
+            var helloText = document.createTextNode(usrname+', Welcome to audi service center.');
+            hello.appendChild(helloText);
+            var titleDiv = byId('title');
+            titleDiv.appendChild(hello);
+            moveIt('title'); //call animation for title
+        }
+
+
+        //create select element under different conditions, check if the new value is one of the options of
+        //the last select element, if not, remove the last element. if yes, append a new select element.
+        //after user makes answers all question, show a form for user name and email.
+        function answerChange(value){
+            //create the first select element
+            if (value == 'step1') {
+                createSelect(value);
+            }
+            else {
+                keepAppendChild = false;
+                //get the options of the last select element
+                lastChildOptions = byId('myform').lastElementChild.options;
+                //check if the new value is one of the options of the last select element
+                if(lastChildOptions != undefined)
+                {
+                    for(i in lastChildOptions)
+                    {
+                        if (value == lastChildOptions[i].value)
+                        {
+                            keepAppendChild = true;
+                            break;
+                        }
+                    }
+                }
+                //if the new value is one of the options, create a new select
+                if(keepAppendChild)
+                {
+                    createSelect(value);
+                }
+                //if the new value is not of the last options
+                else
+                {
+                    removingChild = true;
+                    //check if the second last select element
+                    do {
+                        lastChildOptions = byId('myform').lastElementChild.options;
+                        if(lastChildOptions != undefined)
+                        {
+                            for(i in lastChildOptions)
+                            {
+                                if (value == lastChildOptions[i].value)
+                                {
+                                    removingChild = false;
+                                    break;
+                                }
+                            }
+                        }
+                        //remove the select element
+                        if(removingChild)
+                        {
+                            byId('myform').removeChild(byId('myform').lastElementChild);
+                        }
+                    }
+                    while(removingChild)
+                    //make sure if user click the first option of each select element, the form is not shown
+                    if(removingChild == false)
+                    {
+                        var sel = document.createElement('select');
+                        sel.onchange = function () {
+                            answerChange(this.value);
+                        };
+                        if(obj[value] != null){
+                            for (i in obj[value]) {
+                                var option = document.createElement("option");
+                                option.text = obj[value][i];
+                                option.value = obj[value][i];
+                                sel.appendChild(option);
+                            }
+                            byId('myform').appendChild(sel);
+                        }
+                    }
+                }
+            }
+        }
+
+        //create the select element, if it is the last select element, show the form
+        function createSelect(value){
+            var sel = document.createElement('select');
+            sel.onchange = function () {
+                answerChange(this.value);
+            };
+            if(obj[value] != null){
+                for (i in obj[value]) {
+                    var option = document.createElement("option");
+                    option.text = obj[value][i];
+                    option.value = obj[value][i];
+                    sel.appendChild(option);
+                }
+                byId('myform').appendChild(sel);
+            }else{
+                createForm();
+            }
+        }
+
+        //short cut for getElementsByTagName
+        function byTag(tag, idx){
+            if(idx == undefined){
+                idx = 0;
+            }
+            return document.getElementsByTagName(tag)[idx]; //idx is for body[0]
+        }
+
+        //short cut for getElementById
+        function byId(id){
+            return document.getElementById(id);
+        }
+
+        //the restart button will reset all usr selections
+        function clearAll() {
+            while(byId('myform').childNodes.length>2){
+                byId('myform').removeChild(byId('myform').lastChild);
+            }
+        }
+
+        //create the form for usr name and email, if user had visited the page and submitted answers,
+        // the name and email text field will show data from localstorage, otherwise, new submisstion will be saved in
+        // localstorage
+        function createForm(){
+            //the outer div
+            var usrInfo = document.createElement('div');
+            usrInfo.setAttribute('name', 'usrInfo');
+            usrInfo.setAttribute('id','usrInfo');
+
+            //name div
+            var nameDiv = document.createElement('div');
+            var usrnameLabel = document.createElement('label');
+            usrnameLabel.setAttribute('for','usrname');
+            var labeltext = document.createTextNode("name: ");
+            usrnameLabel.appendChild(labeltext);
+            var usrname = document.createElement('input');
+            usrname.setAttribute('type','text');
+            usrname.setAttribute('id','usrname');
+            usrname.setAttribute('name','usrname');
+            //check local storage
+            if(localStorage){
+                if(localStorage.getItem('usrname')){
+                    usrname.setAttribute('value',localStorage.getItem('usrname'));
+                }else{
+                    usrname.setAttribute('value','');
+                }
+            }
+            nameDiv.appendChild(usrnameLabel);
+            nameDiv.appendChild(usrname);
+
+            //email div
+            var emailDiv = document.createElement('div');
+            var usrEmailLabel = document.createElement('label');
+            usrEmailLabel.setAttribute('for','usrEmail');
+            var elabeltext = document.createTextNode("email: ");
+            usrEmailLabel.appendChild(elabeltext);
+            var usrEmail = document.createElement('input');
+            usrEmail.setAttribute('type','email');
+            usrEmail.setAttribute('id','usremail');
+            usrEmail.setAttribute('name','usremail');
+            //check localstorage
+            if(localStorage){
+                if(localStorage.getItem('usremail')){
+                    usrEmail.setAttribute('value',localStorage.getItem('usremail'));
+                }else{
+                    usrEmail.setAttribute('value','');
+                }
+            }
+            emailDiv.appendChild(usrEmailLabel);
+            emailDiv.appendChild(usrEmail);
+
+            var buttonDiv = document.createElement('div');
+            buttonDiv.setAttribute('id','submitButton')
+            var buttonSubmit = document.createElement('input');
+            buttonSubmit.setAttribute('type','submit');
+            buttonSubmit.value = 'Submit';
+            //new submission will be sent to localstorage
+            buttonSubmit.onclick = function () {
+                sendUsrinfo(usrname.value,usrEmail.value);
+            }
+            buttonDiv.appendChild(buttonSubmit);
+
+            usrInfo.appendChild(nameDiv);
+            usrInfo.appendChild(emailDiv);
+            usrInfo.appendChild(buttonDiv);
+            byId('myform').appendChild(usrInfo);
+        }
+
+        //save name and email in localstorage, prompt user a thanks message
+        function sendUsrinfo(name, email){
+            localStorage.setItem('usrname', name);
+            localStorage.setItem('usremail', email);
+            alert("Thank you for your submission!");
+        }
+
+        //animation for title
+        function moveIt(id){
+            var movedDiv = byId(id);
+            movedDiv.style.top = movedDiv.offsetTop +'px';
+            if( parseInt(movedDiv.style.top) <= 120 ){
+                movedDiv.style.top = parseInt(movedDiv.style.top)+1+'px';
+                setTimeout(function(){moveIt(id);}, 5);
+            }
+        }
+
+    </script>
+
+    <style>
+        *{padding:0;margin:0;}
+        body{
+            background-image:url("audi-1277957_1920.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            min-height: 1000px;
+            background-position: top;
+            font-family: 'Roboto','Helvetica','Arial',sans-serif;
+        }
+        #title{
+            position: relative;
+            left: 0;
+            display: block;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            color:  white;
+            font-size: 1.2em;
+        }
+        #container{
+            background-color: white;
+            position:absolute;
+            top: 30%;
+            width: 100%;
+        }
+        #myform{
+            width: 100%;
+            min-height:400px;
+            padding: 20px;
+        }
+        /* material design style selection, form and button
+        with ripple effects*/
+        select{
+            display: block;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            height:50px;
+            border: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            font-size: 1.2em;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        select :focus{
+            outline: none;
+        }
+        select option {
+            display: block;
+            height: 150px;
+        }
+        #usrInfo{
+            margin-left: auto;
+            margin-right: auto;
+            width: 60%;
+            padding-Top:32px;
+            line-height: 32px;
+        }
+        #usrInfo label{
+            display: inline-block;
+            width: 10%;
+            font-size: 1.2em;
+        }
+        #usrInfo input{
+            width: calc(90% - 16px);
+            position: relative;
+            left:16px;
+            border: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            line-height: 32px;
+            margin-bottom: 8px;
+            font-size: 1.2em;
+        }
+        #submitButton{
+            display: block;
+            position: relative;
+            margin: 24px auto;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            border: none;
+            border-radius: 2px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+            background-color:#009688;
+            transition: background-color .3s;
+        }
+        #submitButton input{
+            width: 100%;
+            left: 0;
+            border: none;!important;
+            font-size: 1em;
+            background-color: transparent;
+            color: #ecf0f1;
+            padding-top: 8px;
+        }
+        #submitButton:hover, #submitButton:focus, .button:hover, .button:focus{
+            background-color: #00796B;
+        }
+        #submitButton:before, .button:before{
+            content: "";
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            display: block;
+            width: 0;
+            padding-top: 0;
+            border-radius: 100%;
+            background-color: rgba(240, 240, 240, .5);
+
+            -webkit-transform: translate(-50%, -50%);
+            -moz-transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            -o-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+        #submitButton:active:before,  .button:active:before{
+            width: 200%;
+            padding-top: 120%;
+            transition: width .2s ease-out, padding-top .2s ease-out;
+        }
+        #buttonDiv{
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 32px;
+            position: relative;
+        }
+        .button{
+            display: inline-block;
+            position: relative;
+            left:16px;
+            padding: 0;
+            overflow: hidden;
+            width: 160px;
+            line-height: 32px;
+            border: none;
+            border-radius: 2px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+            background-color:#009688;
+            transition: background-color .3s;
+        }
+        .button span{
+            display: block;
+            color: white;
+            font-size: 1.2em;
+        }
+        #name{
+            position: absolute;
+            bottom:16px;
+            font-size: 1.2em;
+            padding-left: 16px;
+            color:#B2DFDB;
+        }
+    </style>
+
+</head>
+<body onload="answerChange('step1');createTitle();">
+    <div id="title">
+    </div>
+    <div id="container">
+        <form id="myform">
+        </form>
+        <div id="buttonDiv"><button class="button" onclick="clearAll();" ><span>restart</span></button>
+            <button class="button" onclick="checkBrowser();"><span>check browser</span></button>
+        </div>
+    </div>
+    <div id="name">ISTE-Shuang Chang Javascript Project </div>
+</body>
+</html>
